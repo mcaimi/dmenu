@@ -1,3 +1,14 @@
+DMENU - Suckless Dynamic Menu
+=============================
+
+This is my private fork of suckless' own Dmenu tool.
+It is just a mirror of their git repository with some patches already applied:
+
+- Alpha Patch
+- Window Border Patch
+
+Also some new features will be added in the future.
+
 dmenu - dynamic menu
 ====================
 dmenu is an efficient dynamic menu for X.
