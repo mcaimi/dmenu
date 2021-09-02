@@ -1,7 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
 
-static int topbar = 1;                      /* -b  option; if 0, dmenu appears at bottom     */
+static int topbar = 1;     /* -b  option; if 0, dmenu appears at bottom     */
+static int fuzzy = 1; /* fuzzy match on by default */
 
 /* alpha channel value for transparency */
 static const unsigned int alpha = 0xf0;
@@ -23,12 +24,16 @@ static const char *colors[SchemeLast][2] = {
 	/*     fg         bg       */
 	[SchemeNorm] = { "#bbbbbb", "#222222" },
 	[SchemeSel] = { "#eeeeee", "#005577" },
+	[SchemeSelHighlight] = { "#ffc978", "#005577" },
+	[SchemeNormHighlight] = { "#ffc978", "#222222" },
 	[SchemeOut] = { "#000000", "#00ffff" },
 };
 
 static const unsigned int alphas[SchemeLast][2] = {
 	[SchemeNorm] = { OPAQUE, alpha },
 	[SchemeSel] = { OPAQUE, alpha },
+	[SchemeSelHighlight] = { OPAQUE, alpha},
+	[SchemeNormHighlight] = { OPAQUE, alpha},
 	[SchemeOut] = { OPAQUE, alpha },
 };
 
