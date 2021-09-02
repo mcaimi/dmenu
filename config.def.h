@@ -39,6 +39,8 @@ static const unsigned int alphas[SchemeLast][2] = {
 
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines      = 0;
+/* -g option: number of columns to draw if lines is > 0 */
+static unsigned int columns    = 0;
 
 /*
  * Characters not considered part of a word while deleting words
