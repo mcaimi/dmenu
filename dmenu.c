@@ -67,6 +67,7 @@ static Colormap cmap;
 static int (*fstrncmp)(const char *, const char *, size_t) = strncmp;
 static char *(*fstrstr)(const char *, const char *) = strstr;
 static void xinitvisual();
+static void refreshoptions();
 
 static void
 appenditem(struct item *item, struct item **list, struct item **last)
@@ -232,6 +233,9 @@ grabkeyboard(void)
 static void
 match(void)
 {
+  if (dynamic && *dynamic)
+    refreshoptions();
+
 	static char **tokv = NULL;
 	static int tokn = 0;
 
@@ -253,7 +257,7 @@ match(void)
 		for (i = 0; i < tokc; i++)
 			if (!fstrstr(item->text, tokv[i]))
 				break;
-		if (i != tokc) /* not all tokens match */
+		if (i != tokc && !(dynamic && *dynamic)) /* not all tokens match */
 			continue;
 		/* exact matches go first, then prefixes, then substrings */
 		if (!tokc || !fstrncmp(text, item->text, textsize))
@@ -549,14 +553,14 @@ paste(void)
 }
 
 static void
-readstdin(void)
+readstdin(FILE *stream)
 {
 	char buf[sizeof text], *p;
 	size_t i, imax = 0, size = 0;
 	unsigned int tmpmax = 0;
 
 	/* read each line from stdin and add it to the item list */
-	for (i = 0; fgets(buf, sizeof buf, stdin); i++) {
+	for (i = 0; fgets(buf, sizeof buf, stream); i++) {
 		if (i + 1 >= size / sizeof *items)
 			if (!(items = realloc(items, (size += BUFSIZ))))
 				die("cannot realloc %u bytes:", size);
@@ -574,8 +578,40 @@ readstdin(void)
 	if (items)
 		items[i].text = NULL;
 	inputw = items ? TEXTW(items[imax].text) : 0;
-	lines = MIN(lines, i);
+  if (!dynamic || !(*dynamic))
+    lines = MIN(lines, i);
 }
+
+static void
+refreshoptions(){
+  int dynlen = strlen(dynamic);
+  char *cmd = malloc(dynlen + strlen(text)+2);
+
+  if(cmd == NULL)
+    die("malloc:");
+
+  sprintf(cmd,"%s %s", dynamic, text);
+  FILE *stream = popen(cmd, "r");
+
+  if(!stream) {
+    if (cmd)
+      free(cmd);
+    die("popen(%s):",cmd);
+  }
+
+  readstdin(stream);
+  int pc = pclose(stream);
+  if (pc == -1) {
+    if (cmd)
+      free(cmd);
+    die("pclose:");
+  }
+
+  free(cmd);
+  curr = sel = items;
+}
+
+
 
 static void
 run(void)
@@ -738,8 +774,9 @@ setup(void)
 static void
 usage(void)
 {
-	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
+	fputs("usage: dmenu [-bcfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n"
+        "             [-bw border_width] [-dy command]\n", stderr);
 	exit(1);
 }
 
@@ -784,6 +821,8 @@ main(int argc, char *argv[])
 			colors[SchemeSel][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
+		else if (!strcmp(argv[i], "-dy"))   /* embedding window id */
+			dynamic = argv[++i];
 		else if (!strcmp(argv[i], "-bw"))
 			border_width = atoi(argv[++i]); /* border width */
 		else
@@ -813,9 +852,11 @@ main(int argc, char *argv[])
 
 	if (fast && !isatty(0)) {
 		grabkeyboard();
-		readstdin();
+    if (!(dynamic && *dynamic))
+      readstdin(stdin);
 	} else {
-		readstdin();
+    if (!(dynamic && *dynamic))
+      readstdin(stdin);
 		grabkeyboard();
 	}
 	setup();
