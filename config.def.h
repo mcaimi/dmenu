@@ -1,6 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
 
+#define MIN_HEIGHT 8
+
 static int topbar = 1;     /* -b  option; if 0, dmenu appears at bottom     */
 static int fuzzy = 1; /* fuzzy match on by default */
 
@@ -41,6 +43,8 @@ static const unsigned int alphas[SchemeLast][2] = {
 static unsigned int lines      = 0;
 /* -g option: number of columns to draw if lines is > 0 */
 static unsigned int columns    = 0;
+/* -h option: sets the height in pixel of the dmenu window */
+static unsigned int lineheight = 0;
 
 /*
  * Characters not considered part of a word while deleting words

@@ -9,6 +9,7 @@ For now is just a mirror of dmenu official git repository with some patches alre
 - Center Patch
 - Fuzzy Match + Fuzzy Highlight Patches
 - Grid layout + Gridnav Patches
+- Custom Height Patch
 
 Also some new features will be added in the future.
 
