@@ -2,11 +2,12 @@ DMENU - Suckless Dynamic Menu
 =============================
 
 This is my private fork of suckless' own Dmenu tool.
-It is just a mirror of their git repository with some patches already applied:
+For now is just a mirror of dmenu official git repository with some patches already applied:
 
 - Alpha Patch
 - Window Border Patch
 - Center Patch
+- Fuzzy Match + Fuzzy Highlight Patches
 
 Also some new features will be added in the future.
 
