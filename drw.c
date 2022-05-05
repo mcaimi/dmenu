@@ -136,6 +136,8 @@ xfont_create(Drw *drw, const char *fontname, FcPattern *fontpattern)
     die("no font specified.");
   }
 
+  // allow linking to a patched libXft version to support color fonts
+  #ifndef XFT_COLOR_FONTS
   /* Do not allow using color fonts. This is a workaround for a BadLength
    * error from Xft with color glyphs. Modelled on the Xterm workaround. See
    * https://bugzilla.redhat.com/show_bug.cgi?id=1498269
@@ -148,6 +150,7 @@ xfont_create(Drw *drw, const char *fontname, FcPattern *fontpattern)
     XftFontClose(drw->dpy, xfont);
     return NULL;
   }
+  #endif
 
   font = ecalloc(1, sizeof(Fnt));
   font->xfont = xfont;

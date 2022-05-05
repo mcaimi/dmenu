@@ -25,6 +25,8 @@ LIBS = -L$(X11LIB) -lX11 $(XINERAMALIBS) $(FREETYPELIBS) -lXrender -lm
 # flags
 CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200809L -DVERSION=\"$(VERSION)\" $(XINERAMAFLAGS)
 CFLAGS   = -std=c99 -pedantic -Wall -Os $(INCS) $(CPPFLAGS)
+# enable color fonts. requires linking against a patched libXft
+#CFLAGS   = -std=c99 -pedantic -Wall -Os $(INCS) -DXFT_COLOR_FONTS $(CPPFLAGS)
 LDFLAGS  = $(LIBS)
 
 # compiler and linker
