@@ -15,27 +15,37 @@ static int centered = 0;                    /* -c option; centers dmenu on scree
 static int min_width = 500;                 /* minimum width when centered */
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
+static char font[] = "monospace:size=10";
 static const char *fonts[] = {
+  font,
   "monospace:size=10"
 };
 
 static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
 static const char *dynamic     = NULL;      /* -dy option; dynamic command to run on input change */
 
-static const char *colors[SchemeLast][2] = {
+static char normbg[] = "#bbbbbb";
+static char normfg[] = "#222222";
+static char normhighlightfg[] = "#ffc978";
+static char normhighlightbg[] = "#222222";
+static char selfg[] = "#eeeeee";
+static char selbg[] = "#005577";
+static char selhighlightfg[] = "#ffc978";
+static char selhighlightbg[] = "#005577";
+static char *colors[SchemeLast][2] = {
   /*     fg         bg       */
-  [SchemeNorm] = { "#bbbbbb", "#222222" },
-  [SchemeSel] = { "#eeeeee", "#005577" },
-  [SchemeSelHighlight] = { "#ffc978", "#005577" },
-  [SchemeNormHighlight] = { "#ffc978", "#222222" },
+  [SchemeNorm] = { normfg, normbg },
+  [SchemeSel] = { selfg, selbg },
+  [SchemeSelHighlight] = { selhighlightfg, selhighlightbg },
+  [SchemeNormHighlight] = { normhighlightfg, normhighlightbg },
   [SchemeOut] = { "#000000", "#00ffff" },
 };
 
-static const unsigned int alphas[SchemeLast][2] = {
+static unsigned int alphas[SchemeLast][2] = {
   [SchemeNorm] = { OPAQUE, alpha },
   [SchemeSel] = { OPAQUE, alpha },
-  [SchemeSelHighlight] = { OPAQUE, alpha},
-  [SchemeNormHighlight] = { OPAQUE, alpha},
+  [SchemeSelHighlight] = { OPAQUE, alpha },
+  [SchemeNormHighlight] = { OPAQUE, alpha },
   [SchemeOut] = { OPAQUE, alpha },
 };
 
@@ -51,3 +61,18 @@ static unsigned int lineheight = 0;
  * for example: " /?\"&[]"
  */
 static const char worddelimiters[] = " ";
+
+/* configurable Xresources */
+ResourceAtom configurable_resources[] = {
+  { "font", STRING, &font },
+  { "normfg", STRING, &normfg },
+  { "normbg", STRING, &normbg },
+  { "normhighlightfg", STRING, &normhighlightfg },
+  { "normhighlightbg", STRING, &normhighlightbg },
+  { "selfg", STRING, &selfg },
+  { "selbg", STRING, &selbg },
+  { "selhighlightfg", STRING, &selhighlightfg },
+  { "selhighlightbg", STRING, &selhighlightbg },
+};
+
+unsigned int resource_inventory_size = sizeof(configurable_resources)/sizeof(configurable_resources[0]);

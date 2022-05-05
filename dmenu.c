@@ -18,6 +18,7 @@
 #include <X11/extensions/Xinerama.h>
 #endif
 #include <X11/Xft/Xft.h>
+#include <X11/Xresource.h>
 
 #include "drw.h"
 #include "util.h"
@@ -73,6 +74,11 @@ static int (*fstrncmp)(const char *, const char *, size_t) = strncmp;
 static char *(*fstrstr)(const char *, const char *) = strstr;
 static void xinitvisual();
 static void refreshoptions();
+
+/* xresources */
+char *setup_xresources(void);
+void update_xresources(char *resource_manager);
+int xresource_load(XrmDatabase db, char *resource_name, enum xresource_type type, void *target);
 
 static unsigned int
 textw_clamp(const char *str, unsigned int n)
@@ -803,8 +809,6 @@ refreshoptions(){
   curr = sel = items;
 }
 
-
-
 static void
 run(void)
 {
@@ -981,11 +985,85 @@ usage(void)
   exit(1);
 }
 
+/* xresources */
+static char *res_manager = NULL;
+
+char *
+setup_xresources(void) {
+  char *resource_manager;
+
+  // get pointer to the display resource manager
+  resource_manager = XResourceManagerString(dpy);
+  if (!resource_manager) {
+    return NULL;
+  }
+
+  // return resource manager
+  return resource_manager;
+}
+
+void
+update_xresources(char *resource_manager) {
+  XrmDatabase db;
+
+  // get the database
+  db = XrmGetStringDatabase(resource_manager);
+
+  // load resources from database
+  for (int index = 0; index < resource_inventory_size; index++) {
+    xresource_load(db, configurable_resources[index].xrdb_entry, configurable_resources[index].type, configurable_resources[index].target);
+  }
+}
+
+int
+xresource_load(XrmDatabase db, char *resource_name, enum xresource_type type, void *target) {
+  // build scoped resource name
+  // all valid resources start with the "dwm." prefix
+  char scoped_resource[256];
+  bzero(scoped_resource, sizeof(scoped_resource));
+  snprintf(scoped_resource, sizeof(scoped_resource), "%s.%s", "dmenu", resource_name);
+
+  // XrmResource placeholder
+  XrmValue resource_value;
+
+  // holders for typed returns
+  char *res_type;
+  char **string_resource_type = target;
+  int *integer_resource_type = target;
+  float *float_resource_type = target;
+
+  // load resource from the resources database...
+  XrmGetResource(db, scoped_resource, scoped_resource, &res_type, &resource_value);
+  if (ISNULL(resource_value.addr)) {
+    return 1;
+  }
+
+  // convert returned value
+  switch (type) {
+    case STRING:
+      *string_resource_type = resource_value.addr;
+      break;
+    case INTEGER:
+      *integer_resource_type = strtoul(resource_value.addr, NULL, 10);
+      break;
+    case FLOAT:
+      *float_resource_type = strtof(resource_value.addr, NULL);
+      break;
+  }
+
+  return 0;
+}
+
 int
 main(int argc, char *argv[])
 {
   XWindowAttributes wa;
   int i, fast = 0;
+
+  // load xresources
+  res_manager = setup_xresources();
+  if (res_manager)
+    update_xresources(res_manager);
 
   for (i = 1; i < argc; i++) {
     /* these options take no arguments */
