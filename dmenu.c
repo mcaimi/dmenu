@@ -76,7 +76,7 @@ static void xinitvisual();
 static void refreshoptions();
 
 /* xresources */
-char *setup_xresources(void);
+int setup_xresources(void);
 void update_xresources(char *resource_manager);
 int xresource_load(XrmDatabase db, char *resource_name, enum xresource_type type, void *target);
 
@@ -217,6 +217,21 @@ drawitem(struct item *item, int x, int y, int w)
 }
 
 static void
+recalculatenumbers()
+{
+  unsigned int numer = 0, denom = 0;
+  struct item *item;
+  if (matchend) {
+    numer++;
+    for (item = matchend; item && item->left; item = item->left)
+      numer++;
+  }
+  for (item = items; item && item->text; item++)
+    denom++;
+  snprintf(numbers, NUMBERSBUFSIZE, "%d/%d", numer, denom);
+}
+
+static void
 drawmenu(void)
 {
   unsigned int curpos;
@@ -241,6 +256,7 @@ drawmenu(void)
     drw_rect(drw, x + curpos, 2 + (bh - fh) / 2, 2, fh - 4, 1, 0);
   }
 
+  recalculatenumbers();
   if (lines > 0) {
     /* draw grid */
     int i = 0;
@@ -261,13 +277,15 @@ drawmenu(void)
     }
     x += w;
     for (item = curr; item != next; item = item->right)
-      x = drawitem(item, x, 0, textw_clamp(item->text, mw - x - TEXTW(">")));
+      x = drawitem(item, x, 0, textw_clamp(item->text, mw - x - TEXTW(">") - TEXTW(numbers)));
     if (next) {
       w = TEXTW(">");
       drw_setscheme(drw, scheme[SchemeNorm]);
-      drw_text(drw, mw - w, 0, w, bh, lrpad / 2, ">", 0);
+      drw_text(drw, mw - w - TEXTW(numbers), 0, w, bh, lrpad / 2, ">", 0);
     }
   }
+  drw_setscheme(drw, scheme[SchemeNorm]);
+  drw_text(drw, mw - TEXTW(numbers), 0, TEXTW(numbers), bh, lrpad / 2, numbers, 0);
   drw_map(drw, win, 0, 0, mw, mh);
 }
 
@@ -986,20 +1004,30 @@ usage(void)
 }
 
 /* xresources */
-static char *res_manager = NULL;
-
-char *
+int
 setup_xresources(void) {
   char *resource_manager;
+  Display *temp;
+  
+  // open display
+  temp = XOpenDisplay(NULL);
+  if (!temp)
+    return -1;
 
   // get pointer to the display resource manager
-  resource_manager = XResourceManagerString(dpy);
+  resource_manager = XResourceManagerString(temp);
   if (!resource_manager) {
-    return NULL;
+    return -1;
   }
 
-  // return resource manager
-  return resource_manager;
+  // update xresources
+  update_xresources(resource_manager);
+
+  // close temp display
+  XCloseDisplay(temp);
+
+  // return OK
+  return 0;
 }
 
 void
@@ -1018,7 +1046,7 @@ update_xresources(char *resource_manager) {
 int
 xresource_load(XrmDatabase db, char *resource_name, enum xresource_type type, void *target) {
   // build scoped resource name
-  // all valid resources start with the "dwm." prefix
+  // all valid resources start with the "dmenu." prefix
   char scoped_resource[256];
   bzero(scoped_resource, sizeof(scoped_resource));
   snprintf(scoped_resource, sizeof(scoped_resource), "%s.%s", "dmenu", resource_name);
@@ -1028,20 +1056,20 @@ xresource_load(XrmDatabase db, char *resource_name, enum xresource_type type, vo
 
   // holders for typed returns
   char *res_type;
-  char **string_resource_type = target;
+  char *string_resource_type = target;
   int *integer_resource_type = target;
   float *float_resource_type = target;
 
   // load resource from the resources database...
   XrmGetResource(db, scoped_resource, scoped_resource, &res_type, &resource_value);
   if (ISNULL(resource_value.addr)) {
-    return 1;
+    return -1;
   }
 
   // convert returned value
   switch (type) {
     case STRING:
-      *string_resource_type = resource_value.addr;
+      strcpy(string_resource_type, resource_value.addr);
       break;
     case INTEGER:
       *integer_resource_type = strtoul(resource_value.addr, NULL, 10);
@@ -1061,9 +1089,8 @@ main(int argc, char *argv[])
   int i, fast = 0;
 
   // load xresources
-  res_manager = setup_xresources();
-  if (res_manager)
-    update_xresources(res_manager);
+  if (setup_xresources() < 0)
+    die("error while loading XResources");
 
   for (i = 1; i < argc; i++) {
     /* these options take no arguments */

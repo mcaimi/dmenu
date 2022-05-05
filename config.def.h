@@ -2,9 +2,12 @@
 /* Default settings; can be overriden by command line. */
 
 #define MIN_HEIGHT 8
+#define NUMBERSMAXDIGITS      100
+#define NUMBERSBUFSIZE        (NUMBERSMAXDIGITS * 2) + 1
 
 static int topbar = 1;     /* -b  option; if 0, dmenu appears at bottom     */
 static int fuzzy = 1; /* fuzzy match on by default */
+static char numbers[NUMBERSBUFSIZE] = "";
 
 /* alpha channel value for transparency */
 static const unsigned int alpha = 0xf0;
@@ -24,8 +27,8 @@ static const char *fonts[] = {
 static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
 static const char *dynamic     = NULL;      /* -dy option; dynamic command to run on input change */
 
-static char normbg[] = "#bbbbbb";
-static char normfg[] = "#222222";
+static char normfg[] = "#bbbbbb";
+static char normbg[] = "#222222";
 static char normhighlightfg[] = "#ffc978";
 static char normhighlightbg[] = "#222222";
 static char selfg[] = "#eeeeee";
