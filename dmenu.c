@@ -812,7 +812,7 @@ refreshoptions(){
   if(!stream) {
     if (cmd)
       free(cmd);
-    die("popen(%s):",cmd);
+    die("popen()");
   }
 
   readstdin(stream);
@@ -820,7 +820,7 @@ refreshoptions(){
   if (pc == -1) {
     if (cmd)
       free(cmd);
-    die("pclose:");
+    die("pclose()");
   }
 
   free(cmd);
