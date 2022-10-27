@@ -989,12 +989,11 @@ setup(void)
 static void
 usage(void)
 {
-  fputs("usage: dmenu [-bcfFiv] [-g columns ] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+  die("usage: dmenu [-bcfFiv] [-g columns ] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
         "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n"
         "             [-nhb color] [-nhf color] [-shb color] [-shf color]\n"
         "             [-x xoffset] [-y yoffset] [-z width]\n"
-        "             [-h pixels] [-bw border_width] [-dy command]\n", stderr);
-  exit(1);
+        "             [-h pixels] [-bw border_width] [-dy command]\n");
 }
 
 /* xresources */
