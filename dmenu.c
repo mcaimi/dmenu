@@ -779,20 +779,20 @@ static void
 readstdin(FILE *stream)
 {
   char *line = NULL;
-  size_t i, junk, itemsiz = 0;
+  size_t i, linesiz = 0, itemsiz = 0;
   ssize_t len;
 
   /* read each line from stdin and add it to the item list */
-  for (i = 0; (len = getline(&line, &junk, stdin)) != -1; i++) {
+  for (i = 0; (len = getline(&line, &linesiz, stdin)) != -1; i++) {
     if (i + 1 >= itemsiz)
       itemsiz += 256;
       if (!(items = realloc(items, itemsiz * sizeof(*items))))
         die("cannot realloc %zu bytes:", itemsiz * sizeof(*items));
     if (line[len - 1] == '\n')
       line[len - 1] = '\0';
-    items[i].text = line;
+    if (!(items[i].text = strdup(line)))
+      die("strdup:");
     items[i].out = 0;
-    line = NULL;
   }
   free(line);
   if (items)
