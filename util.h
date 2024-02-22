@@ -12,6 +12,8 @@
 #define ISNULL(variable)  (variable == NULL)
 #define ISNOTNULL(variable)  (variable != NULL)
 
+#define LENGTH(X)             (sizeof X / sizeof X[0])
+
 enum xresource_type {
   STRING = 0,
   INTEGER = 1,
