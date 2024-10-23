@@ -783,10 +783,11 @@ readstdin(FILE *stream)
 
   /* read each line from stdin and add it to the item list */
   for (i = 0; (len = getline(&line, &linesiz, stdin)) != -1; i++) {
-    if (i + 1 >= itemsiz)
+    if (i + 1 >= itemsiz) {
       itemsiz += 256;
       if (!(items = realloc(items, itemsiz * sizeof(*items))))
         die("cannot realloc %zu bytes:", itemsiz * sizeof(*items));
+    }
     if (line[len - 1] == '\n')
       line[len - 1] = '\0';
     if (!(items[i].text = strdup(line)))
